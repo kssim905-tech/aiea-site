@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-6">
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">Membership Directory</h1>
+            <p class="text-sm text-gray-500 mt-1">Official list of all 84 members with company, address, contact, and email details.</p>
+        </header>
+
+        <!-- Search Bar Section -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="w-full relative">
+                <input type="text" id="searchInput" oninput="filterTable()" placeholder="Search by company name, address, phone or email..." class="w-full pl-4 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+            </div>
+            <div class="text-sm text-gray-500 whitespace-nowrap">
+                Showing <span id="rowCount" class="font-semibold text-gray-900">84</span> entries
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+                    <thead class="bg-gray-100 text-gray-700 font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 w-16">No</th>
+                            <th class="px-4 py-3">Company Name</th>
+                            <th class="px-4 py-3">Address</th>
+                            <th class="px-4 py-3">Telephone</th>
+                            <th class="px-4 py-3">Email</th>
+                            <th class="px-4 py-3">Fax</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <p class="text-gray-500 text-sm">No matching members found.</p>
+        </div>
+    </div>
+
+    <script>
+        const membersData = [
+            { id: 1, name: "138 Capital Pte Ltd", address: "1 North Bridge Road #06-29 High Street Centre Singapore 179094", tel: "97458239", email: "gary@138-capital.com / terence@138-capital.com", fax: "-" },
+            { id: 2, name: "2 Accurate Pte Ltd", address: "60 Jalan Lam Huat #05-68 Carros Centre Singapore 737869", tel: "98888885", email: "jeremy@mycarholdings.asia", fax: "69255219" },
+            { id: 3, name: "ABS Bus Pte Ltd", address: "38M Penjuru Road Singapore 609148", tel: "94503900", email: "hr@absgroup.sg", fax: "-" },
+            { id: 4, name: "ACE Financial Services Pte Ltd", address: "237 Alexandra Road #05-11 The Alexcier Singapore 159929", tel: "67585115", email: "keithoh@acecorp.com.sg", fax: "67595115" },
+            { id: 5, name: "Allmotoring.sg", address: "200 Jalan Sultan #04-17 Textile Centre Singapore 199018", tel: "81000999", email: "fedwu@allmotoring.sg", fax: "69098609" },
+            { id: 6, name: "Andric Leasing", address: "181 Kitchener Road #01-08 Parkroyal Hotel @Kitchener Singapore 208534", tel: "62918008", email: "andricleasing@singnet.com.sg", fax: "62915005" },
+            { id: 7, name: "Auto Asia Pte Ltd", address: "60 Jalan Lam Huat #04-35 Carros Centre Singapore 737869", tel: "91266738 / 90182184", email: "ryan@autoasia.com.sg", fax: "-" },
+            { id: 8, name: "Automotive Direct", address: "81A Clemenceau Ave #05-18 Singapore 239918", tel: "98618618", email: "admin@automotivedirect.com.sg", fax: "68308228" },
+            { id: 9, name: "AutoSoon Pte Ltd", address: "176 Sin Ming Drive #01-10 Sin Ming AutoCare Singapore 575721", tel: "64526657", email: "soon@autosoon.net", fax: "64514618" },
+            { id: 10, name: "Big Bird Automobiles Pte Ltd", address: "68 Jalan Jurong Kechil #01-27 Singapore 596180", tel: "83238899", email: "daniel@bb-automobiles.com", fax: "-" },
+            { id: 11, name: "Car Express Auto Trading", address: "73 Mackenzie Road Singapore 228729", tel: "69805254", email: "carexpressautotrading1@gmail.com", fax: "69805253" },
+            { id: 12, name: "Car House Pte Ltd", address: "210 Turf Club Road LOT B06 The Grandstand Singapore 287995", tel: "64620620", email: "winstontan999@yahoo.com.sg", fax: "64686200" },
+            { id: 13, name: "Car Lingual Pte Ltd", address: "1 Bukit Batok Crescent #04-62 Wcega Plaza Singapore 658064", tel: "64690002", email: "alphonsus@carlingual.com.sg", fax: "67626298" },
+            { id: 14, name: "Carteala Pte Ltd", address: "8 Kaki Bukit Ave 4 #06-28 Premier @ Kaki Bukit Singapore 415875", tel: "60150970", email: "contact@carteala.com", fax: "60150971" },
+            { id: 15, name: "Chai Giap Auto Trading Pte Ltd", address: "1 Bukit Batok Crescent #05-56 WCEGA PLAZA Singapore 658064", tel: "64409611", email: "chaigiap31@hotmail.com", fax: "64409622" },
+            { id: 16, name: "Cheng Yong Credit Enterprises Pte Ltd", address: "5 Benoi Place Singapore 629926", tel: "67770666", email: "ziyang@primetaxi.com.sg", fax: "67742608" },
+            { id: 17, name: "COE Auto Trading", address: "18 Sin Ming Lane #02-03 Midview City Singapore 573960", tel: "64571902 / 98229833", email: "kenneth@coeauto.com.sg", fax: "-" },
+            { id: 18, name: "Convince Auto Pte Ltd", address: "29 First Lok Yang Road Singapore 629736", tel: "65561131", email: "convinceapl@convinceauto.com.sg", fax: "65531131" },
+            { id: 19, name: "Dave Motor Trading Company", address: "400 Balestier Road #02-12 Balestier Plaza Singapore 329802", tel: "62505955", email: "davemotor@singnet.com.sg", fax: "62538286" },
+            { id: 20, name: "Delgrow Automotive Pte Ltd", address: "33 Ubi Ave 3 #01-14/15 Vertex Singapore 408868", tel: "62518397", email: "angie@delgrow-sg.com / lili@delgrow-sg.com", fax: "62518317" },
+            { id: 21, name: "Eco Ev Pte Ltd", address: "1 Tampines North Drive 1 #03-21 T-SPACE Singapore 528559", tel: "90066212", email: "eco_ev@yahoo.com", fax: "-" },
+            { id: 22, name: "Edmund Motor Pte Ltd", address: "1 Bukit Batok Crescent #02/33/34/35 WCEGA Plaza Singapore 658064", tel: "62513339", email: "edmundmotor@gmail.com", fax: "62661939" },
+            { id: 23, name: "Emperor Motors Pte Ltd", address: "91 Bencoolen Street Sunshine Plaza, #10-04 Singapore 189652", tel: "65436968", email: "-", fax: "65436918" },
+            { id: 24, name: "Esteem Performance Pte Ltd", address: "Blk 5033 Ang Mo Kio Ind Park 2 #01-259 Singapore 569536", tel: "64841221", email: "irisboh@esteemperf.com.sg", fax: "64847829" },
+            { id: 25, name: "Exclusive Global Pte Ltd", address: "60 Jalan Lam Huat, Carros Center, #05-25 Singapore 737869", tel: "6777 8666", email: "admin@exclusiveglobal.org", fax: "6337 7666" },
+            { id: 26, name: "Finesse Holdings Pte Ltd", address: "66 Toh Tuck Road #08-04 Singapore 596730", tel: "62622722", email: "jerrylow2722@gmail.com", fax: "62652722" },
+            { id: 27, name: "Garage R Pte Ltd", address: "8 Tagore Drive #01-00 Singapore 787624", tel: "65544840", email: "siewlee.wong@hks-garager.com.sg", fax: "64539123" },
+            { id: 28, name: "Green Citi Tech (S) Pte Ltd", address: "1 Commonwealth Lane One Commonwealth #06-19 Singapore 149544", tel: "97422693", email: "lydiaang@gcgroup.com.sg", fax: "-" },
+            { id: 29, name: "Henly Enterprises Co Pte Ltd", address: "61 Ubi Avenue 2 #02-05 Automobile Megamart Singapore 408898", tel: "63363133", email: "keets@henly.com.sg", fax: "68460122" },
+            { id: 30, name: "Hoe Beng Auto Trading", address: "3 Ang Mo Kio St 62 #01-20 Link @ AMK Singapore 569139", tel: "67450138", email: "hoebengauto@yahoo.com", fax: "68460138" },
+            { id: 31, name: "Hong Hin Motor Works", address: "25 Kaki Bukit Road 4 #03-33 Synergy@KB Singapore 417800", tel: "96608182", email: "honghinmotorworks@gmail.com", fax: "-" },
+            { id: 32, name: "Hua Yang Enterprise Pte Ltd", address: "47 jalan pemimpin Halcyon 2 #03-05 Singapore 577200", tel: "65519052", email: "selina@huayang.com.sg", fax: "64531320" },
+            { id: 33, name: "Jack Cars Enterprise Pte Ltd", address: "61 Ubi Avenue 2 #01-08/19/20 Automobile Megamart Singapore 408898", tel: "67441900", email: "adminstrator@jackcars.com.sg", fax: "67444456" },
+            { id: 34, name: "JCWC Automobile Pte Ltd", address: "21 Toh Guan Road East #01-21/22 Toh Guan Centre Singapore 608609", tel: "65696969", email: "wendychew@jcwc.com.sg / admin@jcwc.com.sg", fax: "65692969" },
+            { id: 35, name: "Jit Keong Trading Co Pte Ltd", address: "28 Benoi Place Singapore 629945", tel: "65624186", email: "main@jitkeong.com.sg", fax: "68613533" },
+            { id: 36, name: "JWG International Pte Ltd", address: "10 Ang Mo Kio Industrial Park 2A, #03-08 AMK AutoPoint, Singapore 568047", tel: "96988882", email: "Jwg.international@yahoo.com", fax: "64841922" },
+            { id: 37, name: "Kuon Motors Pte Ltd", address: "37 Kallang Pudding Road #03-01 Singapore 349315", tel: "62510800", email: "kuonmotors@gmail.com", fax: "67522007" },
+            { id: 38, name: "Lay Auto Pte Ltd", address: "21 Toh Guan Road East #01-16/17 Toh Guan Centre Singapore 608609", tel: "64625828", email: "andy@layauto.com", fax: "64681179" },
+            { id: 39, name: "Leco Auto Pte Ltd", address: "61 Ubi Avenue 2 #01-05 Automobile Megamart Singapore 408898", tel: "68420070", email: "cobin@leco.com.sg", fax: "68467446" },
+            { id: 40, name: "Leco Prestige Pte Ltd", address: "61 Ubi Avenue 2 #04-04 Automobile Megamart Singapore 408898", tel: "64740566 / 97806972", email: "sales@lecoprestige.com", fax: "68469983" },
+            { id: 41, name: "Luxurie Auto Pte Ltd", address: "7030 Ang Mo Kio Ave 5 #B1-01 NorthStar @ AMK Singapore 569880", tel: "6222 8882", email: "luxurieauto@yahoo.com.sg", fax: "6481 1916" },
+            { id: 42, name: "M Label Auto Pte Ltd", address: "9 TAGORE LANE #01-04 SINGAPORE 787472", tel: "88238778", email: "limzhanyi@mcorporations.sg", fax: "-" },
+            { id: 43, name: "Meyer Motors Pte Ltd", address: "30 Ubi Ave 3 #01-31 Vertex Singapore 408868", tel: "94776816", email: "managers@meyermotors.sg", fax: "68098477" },
+            { id: 44, name: "Motorworld", address: "51 Ubi Avenue 1 #01-09 Paya Ubi Ind.Park, Singapore 408933", tel: "67470801", email: "motorworld31@yahoo.com.sg", fax: "62875977" },
+            { id: 45, name: "MV Traders Pte Ltd", address: "31 West Coast Highway #01-27 West Coast Car Mart Singapore 117864", tel: "67788862", email: "sales@mvtraders.com.sg", fax: "67751447" },
+            { id: 46, name: "Naga Motor Pte Ltd", address: "33 Sin Ming Drive #01-367 Singapore 575707", tel: "62850035", email: "nagamotor@singnet.com.sg", fax: "64566788" },
+            { id: 47, name: "Ole Supercars Pte Ltd", address: "21 Toh Guan Road East #01-04 Singapore 608609", tel: "67950777", email: "ronpoh@olesupercars.com.sg", fax: "67953778" },
+            { id: 48, name: "PA Exports and Trading", address: "60 Jalan Lam Huat #05-34 Carros Centre Singapore 737869", tel: "65148082", email: "paulraj@paexports.com.sg", fax: "-" },
+            { id: 49, name: "Prime Car Rental & Taxi Services Pte Ltd", address: "5 Benoi Place Singapore 629926", tel: "67770666", email: "alex@primecartraders.com.sg", fax: "67742608" },
+            { id: 50, name: "Prime Motor & Leasing Pte Ltd", address: "5 Benoi Place Singapore 629926", tel: "67419292", email: "nnh@primecar.com.sg", fax: "67461555" },
+            { id: 51, name: "Prime Car Traders Pte Ltd", address: "61 UBI AVE 2 AUTOMOBILE MEGAMART #01-03 SINGAPORE 408898", tel: "67410050", email: "henry@primecartraders.com.sg", fax: "67412092" },
+            { id: 52, name: "Products I Need (P.I.N) Cars Pte Ltd", address: "1 Tampines North Drive 1 #03-20 T-Space Singapore 528559", tel: "62508096", email: "pin_cars@yahoo.com", fax: "-" },
+            { id: 53, name: "Quan Feng Motors (S) Pte Ltd", address: "No 2 Sims Close #01-02 Gemini @ Sims Singapore 387298", tel: "67419549", email: "andrew@quanfenggroup.com", fax: "67429549" },
+            { id: 54, name: "Quantum Armour Pte Ltd", address: "33 Ubi Ave 3, #01-16 Vertex, Singapore 408868", tel: "67526555", email: "maylaw@quantumarmour.com", fax: "67536555" },
+            { id: 55, name: "Regent Express Pte Ltd", address: "33 Ubi Ave 3, Vertex #01-46 Singapore 408868", tel: "68440200", email: "angeline@regent.express", fax: "-" },
+            { id: 56, name: "Republic Auto Pte Ltd", address: "301 Alexandra Road Mercedez-Benz Center Singapore 159968", tel: "68661702", email: "edmund.ng@republicauto.com.sg", fax: "68661717" },
+            { id: 57, name: "Ricardo Cars Pte Ltd", address: "Blk 160 Sin Ming Drive #02-02/03 Sin Ming AutoCity Singapore 575722", tel: "65156888", email: "jeremy@ricardo.com.sg", fax: "64754666" },
+            { id: 58, name: "Royal Motor Grandeur Pte Ltd", address: "61 Ubi Ave 2, #01-21 Automobile Megamart Singapore 408898", tel: "67414911", email: "stefan@royalmotorgrandeur.com.sg / wholesale.rmg2pl@gmail.com", fax: "67416311" },
+            { id: 59, name: "RZER PERFORMANCE PTE LTD", address: "60 Jalan Lam Huat, Carros Center, #03-50/51 SINGAPORE S737869", tel: "64448996", email: "cityauto@live.com", fax: "-" },
+            { id: 60, name: "SCS PTE LTD", address: "180B BENCOOLEN STREET #12-05 The Bencoolen Singapore 189648", tel: "81008866", email: "ryan.scspl@gmail.com", fax: "-" },
+            { id: 61, name: "SCT AUTO SERVICES PTE LTD", address: "60 Jalan Lam Huat #05-06/07 Carros Centre Singapore 737869", tel: "9060 4010", email: "marcussoh@sct.com.sg", fax: "-" },
+            { id: 62, name: "SG Car Choice Pte Ltd", address: "3 Ang Mo Kio St 62 #01-13 LINK@AMK Singapore 569139", tel: "62649492", email: "info@sgcarchoice.com", fax: "62649113" },
+            { id: 63, name: "Shine Trust Trading Pte Ltd", address: "27 Transit Road #01-02 Forest Hills Singapore 778904", tel: "65533714 / 96378154", email: "0164matsumoto@gmail.com", fax: "65533724" },
+            { id: 64, name: "Sin Thai Hin Motor & Credit Pte Ltd", address: "128 Princep Street #02-01 Sin Thai Hin Building, Singapore 188655", tel: "63395511", email: "jesimine@sth.com.sg", fax: "63385606" },
+            { id: 65, name: "SkyLink Auto Pte Ltd", address: "1 Bukit Batok Crescent #08-03 WCEGA PLAZA Singapore 658064", tel: "84992356 / 84992166", email: "wesley@skylink.com.sg / Johnson@skylink.com.sg", fax: "-" },
+            { id: 66, name: "Song Auto Pte Ltd", address: "39 Woodlands close, Mega @ Woodlands #01-27/28 Singapore 737856", tel: "62720080", email: "songjie@songauto.biz", fax: "-" },
+            { id: 67, name: "Star Deals Gallery Pte Ltd", address: "159 Sin Ming Road #01-05 AMTECH Building Singapore 575625", tel: "64649697", email: "rashidi@stardealsgallery.com", fax: "64648363" },
+            { id: 68, name: "StarBright Auto Pte Ltd", address: "1 Bukit Batok Crescent #02-13/14 Wcega Plaza Singapore 658046", tel: "67930080", email: "catherine@starbrightauto.com", fax: "67930800" },
+            { id: 69, name: "Stockport Pte Ltd", address: "20 Sin Ming Lane #03-61 Singapore 573968", tel: "83836957", email: "stockportpteltd2016@gmail.com", fax: "-" },
+            { id: 70, name: "Sun Master Trading Co", address: "170 Upp Bukit Timah Road #05-05 Bt Timah Shopping Centre Singapore 588179", tel: "64672004", email: "sunmaster@singnet.com.sg", fax: "64620300" },
+            { id: 71, name: "Swee Seng Motors Pte Ltd", address: "21 Toh Guan Road East #01-01/02 Toh Guan Centre Singapore 608609", tel: "63663808", email: "kelvin.pohcy@ssgroup.sg / tony.tanhx@ssgroup.sg", fax: "64633808" },
+            { id: 72, name: "Tatco Enterprise", address: "250 Jalan Kayu Singapore 799475", tel: "64820153", email: "francis@tatcogroup.com.sg", fax: "64811903" },
+            { id: 73, name: "The Car Catalogue Pte Ltd", address: "53 Ubi Ave 3 #01-01 Singapore 408863", tel: "6958 6128", email: "john.tiah@sgcartalog.com", fax: "-" },
+            { id: 74, name: "The Car Cycle Pte Ltd", address: "No 3 Jalan Tari Zapin Singapore 799050", tel: "81522220", email: "daveling@thecarcycle.com.sg", fax: "-" },
+            { id: 75, name: "Think One Automobile & Trading Pte Ltd", address: "20 Ubi Road 4 Thinkone Building Singapore 408622", tel: "65453300", email: "ntt@thinkone.com.sg", fax: "65433303 / 64679330" },
+            { id: 76, name: "Tiong Choon Co Pte Ltd", address: "159 Sin Ming Road #01-07 Singapore 575625", tel: "63383600", email: "tchoon22@pacific.net.sg", fax: "63372898" },
+            { id: 77, name: "United Motoring Pte Ltd", address: "1 Bukit Batok Crescent Wcega Plaza #03-53 Singapore 658064", tel: "64635355", email: "admin@unitedmotoringpl.com", fax: "64635455" },
+            { id: 78, name: "Venture Cars Pte Ltd", address: "33 Ubi Ave 3 #02-42 Vertex Singapore 408868", tel: "62898800", email: "enquiry@bw.com.sg", fax: "68582120" },
+            { id: 79, name: "Vincar Pte Ltd", address: "24 Leng Kee Road #01-02 Leng Kee Autopoint Singapore 159096", tel: "67491119", email: "vincenttan@vincar.com.sg", fax: "68421911 / 64791911" },
+            { id: 80, name: "Vin's Auto Pte Ltd", address: "160 Sin Ming Drive Sin Ming Autocity #03-03 Singapore 575722", tel: "64532121", email: "galvin@vinsautogroup.com.sg", fax: "64599795" },
+            { id: 81, name: "William's Auto Pte Ltd", address: "280 Woodlands Industrial Park E5 #01-37 & 01-38 Harvest @ Woodlands Singapore 757322", tel: "67636811", email: "waplsp21@singnet.com.sg", fax: "67632166" },
+            { id: 82, name: "Yong Lee Seng Motor Pte Ltd", address: "61 Ubi Avenue 2 #03-05/06 Automobile Megamart Singapore 408898", tel: "68440123", email: "shtang@singnet.com.sg", fax: "68441618" },
+            { id: 83, name: "Yong Lei Logistics Pte Ltd", address: "2023 Bukit Batok Street 23 #01-100 Singapore 659528", tel: "65613268", email: "henry.tan@yllogistics.com.sg", fax: "66651967" },
+            { id: 84, name: "Zion Auto Gallery Pte Ltd", address: "159 Sin Ming Road #01-04 Amtech Building Singapore 575625", tel: "86995800 / 64525565", email: "admin@zionauto.sg", fax: "-" }
+        ];
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            const rowCount = document.getElementById('rowCount');
+            const emptyState = document.getElementById('emptyState');
+
+            rowCount.textContent = data.length;
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tableBody.innerHTML = data.map(m => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-medium text-gray-500">${m.id}</td>
+                    <td class="px-4 py-3 font-semibold text-gray-900">${m.name}</td>
+                    <td class="px-4 py-3 text-gray-600">${m.address}</td>
+                    <td class="px-4 py-3 text-gray-700 whitespace-nowrap">${m.tel}</td>
+                    <td class="px-4 py-3 text-blue-600">${m.email}</td>
+                    <td class="px-4 py-3 text-gray-700 whitespace-nowrap">${m.fax}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = membersData.filter(m => 
+                m.name.toLowerCase().includes(query) ||
+                m.address.toLowerCase().includes(query) ||
+                m.tel.toLowerCase().includes(query) ||
+                m.email.toLowerCase().includes(query) ||
+                m.fax.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        // Initialize table on load
+        window.onload = function() {
+            renderTable(membersData);
+        };
+    </script>
+</body>
+</html>
